@@ -49,30 +49,16 @@ export function DelegateCard({ delegate, onEndMembership, onViewContact }: Deleg
     return noteDate > sevenDaysAgo
   })
 
-  const getInitials = (name: string) => {
-    const parts = name.trim().split(' ')
-    return parts.map(part => part[0].toUpperCase()).join('').slice(0, 2)
-  }
+const getInitials = (name: string) => {
+  const parts = name.trim().split(' ')
+  return parts.map(part => part[0].toUpperCase()).join('').slice(0, 2)
+}
 
-  const initials = getInitials(`${delegate.first_name} ${delegate.last_name}`)
+const initials = getInitials(`${delegate.first_name} ${delegate.last_name}`)
   const isActive = !delegate.end_date
   const hasNewsletter = true
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "—"
-    const [day, month, year] = dateString.split("/")
-    return new Date(`${year}-${month}-${day}`).toLocaleDateString()
-  }
-
-  const extractEmails = (htmlString: string): string[] => {
-    const div = document.createElement("div")
-    div.innerHTML = htmlString
-    return Array.from(div.querySelectorAll("a")).map(a => a.textContent || "")
-  }
-
-  const extractPhones = (htmlString: string): string[] => {
-    return htmlString.split("<br/>").map(phone => phone.trim()).filter(Boolean)
-  }
+  const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString() : "—"
 
   const handleViewContact = () => {
     setIsProfileModalOpen(true)
@@ -110,9 +96,6 @@ export function DelegateCard({ delegate, onEndMembership, onViewContact }: Deleg
 
     return null
   }
-
-  const emails = extractEmails(delegate.mails || "")
-  const phones = extractPhones(delegate.phones || "")
 
   return (
     <>
@@ -175,7 +158,6 @@ export function DelegateCard({ delegate, onEndMembership, onViewContact }: Deleg
               <span>{delegate.job_title}</span>
             </div>
           )}
-
           <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
             <Calendar className="h-3 w-3" />
             <span>Started: {formatDate(delegate.start_date)}</span>
@@ -188,35 +170,18 @@ export function DelegateCard({ delegate, onEndMembership, onViewContact }: Deleg
             )}
           </div>
 
-          <div className="space-y-2">
-            {emails.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                  <Mail className="h-3 w-3" />
-                  <span>Email{emails.length > 1 ? 's' : ''}</span>
-                </div>
-                {emails.map((email, index) => (
-                  <div key={index} className="text-xs text-gray-600 ml-5 truncate">
-                    {email}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {phones.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                  <Phone className="h-3 w-3" />
-                  <span>Phone{phones.length > 1 ? 's' : ''}</span>
-                </div>
-                {phones.map((phone, index) => (
-                  <div key={index} className="text-xs text-gray-600 ml-5">
-                    {phone}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {delegate.email && (
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="h-3 w-3" />
+              <span className="text-gray-600 break-all">{delegate.email}</span>
+            </div>
+          )}
+          {delegate.phones && (
+            <div className="flex items-center gap-2 text-sm">
+              <Phone className="h-3 w-3" />
+              <span className="text-gray-600 break-all">{delegate.phones}</span>
+            </div>
+          )}
 
           <Button variant="ghost" size="sm" onClick={() => setIsNotesModalOpen(true)}>
             <StickyNote className="h-3 w-3 mr-2" /> Add Note
