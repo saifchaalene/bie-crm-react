@@ -37,7 +37,7 @@ export interface Delegate {
   contactType: 'individual' | 'organization'
   startDate: string
   endDate?: string
-  isActive: boolean
+  active: number
   membershipType: 'delegate' | 'member_state'
   memberState?: string // Added member state for delegates
   isNewsletterSubscribed: boolean // Added newsletter subscription status
@@ -55,12 +55,12 @@ export interface Delegate {
   job_title?: string;
   gender?: string;
   gender_id?: number;
-
+  isSubscribed?: number; // Subscription status for newsletters
   start_date?: string;
   end_date?: string;
 
   email?: string;
-  phones: string[] // Multiple phone numbers
+  phones: string // Multiple phone numbers
   mails?: string;
   notes?: DelegateNote[] // Changed to array of timestamped notes
 

@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useState , useEffect} from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,12 +23,24 @@ import {
   Activity,
   Users
 } from "lucide-react"
-import { Delegate } from "@/types/delegate"
+import { Delegate, DelegateNote, Activitysaif } from "@/types/delegate"
+import { DelegatesService } from "@/services/delegatesService"
 
 interface DelegateProfileProps {
   delegate: Delegate | null
   isOpen: boolean
   onClose: () => void
+}
+
+
+interface Relationship {
+  id: string
+  department: string
+  sector: string
+  position: string
+  startDate: string
+  endDate?: string
+  isActive: boolean
 }
 
 interface Event {
@@ -44,35 +56,50 @@ interface Event {
   status: 'attended' | 'registered' | 'cancelled'
 }
 
-interface Relationship {
-  id: string
-  department: string
-  sector: string
-  position: string
-  startDate: string
-  endDate?: string
-  isActive: boolean
-}
 
-interface ActivityLog {
-  id: string
-  action: string
-  performedBy: string
-  timestamp: string
-  details?: string
-}
 
-interface MembershipPeriod {
-  id: string
-  startDate: string
-  endDate?: string
-  role?: string
-  isActive: boolean
-  memberState: string
-  notes?: string
-}
 
 export function DelegateProfile({ delegate, isOpen, onClose }: DelegateProfileProps) {
+
+
+    const [notes, setNotes] = useState<any[]>([])
+  const [memberships, setMemberships] = useState<any[]>([])
+  const [ActivityLog, setActivities] = useState<any[]>([])
+  const [delegatedetails, setDelegatedetails] = useState<any[]>([])
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!delegate) return
+      try {
+        const [fetchedNotes, fetchedMemberships, fetchedActivities , fetchDelegatedetails] = await Promise.all([
+          DelegatesService.getNotesByDelegateId(delegate.id),
+          DelegatesService.getMembershipsByDelegateId(delegate.id),
+          DelegatesService.getActivitiesByDelegateId(delegate.id),
+                    DelegatesService.getDelegateById(delegate.id),
+
+        ])
+        setNotes(fetchedNotes)
+        setMemberships(fetchedMemberships)
+        setActivities(fetchedActivities)
+        setDelegatedetails(fetchDelegatedetails)
+
+
+              console.log(" Fetched Notes:", fetchedNotes)
+      console.log(" Fetched Memberships:", fetchedMemberships)
+      console.log(" Fetched Activities:", fetchedActivities)
+      console.log(" Fetched Delegate Details:", fetchDelegatedetails)
+      } catch (error) {
+        console.error("❌ Error loading delegate details:", error)
+      }
+    }
+
+    if (isOpen) {
+      fetchDetails()
+    }
+  }, [delegate, isOpen])
+
+
+  
   if (!delegate) return null
 
   const initials = delegate.fullname
@@ -83,58 +110,7 @@ export function DelegateProfile({ delegate, isOpen, onClose }: DelegateProfilePr
   }
 
   // Mock data for events
-  const events: Event[] = [
-    {
-      id: '1',
-      name: 'GA 2024',
-      type: 'GA',
-      year: 2024,
-      city: 'Geneva',
-      country: 'Switzerland',
-      startDate: '2024-09-15',
-      endDate: '2024-09-18',
-      role: 'Delegate',
-      status: 'attended'
-    },
-    {
-      id: '2',
-      name: 'Expo 2023',
-      type: 'Expo',
-      year: 2023,
-      city: 'Dubai',
-      country: 'UAE',
-      startDate: '2023-10-01',
-      endDate: '2023-10-28',
-      role: 'Trade Representative',
-      status: 'attended'
-    },
-    {
-      id: '3',
-      name: 'GA 2023',
-      type: 'GA',
-      year: 2023,
-      city: 'New York',
-      country: 'USA',
-      startDate: '2023-09-19',
-      endDate: '2023-09-26',
-      role: 'Observer',
-      status: 'attended'
-    },
-    {
-      id: '4',
-      name: 'Expo 2025',
-      type: 'Expo',
-      year: 2025,
-      city: 'Osaka',
-      country: 'Japan',
-      startDate: '2025-04-13',
-      endDate: '2025-10-13',
-      role: 'Delegate',
-      status: 'registered'
-    }
-  ]
 
-  // Mock data for relationships
   const relationships: Relationship[] = [
     {
       id: '1',
@@ -164,93 +140,25 @@ export function DelegateProfile({ delegate, isOpen, onClose }: DelegateProfilePr
   ]
 
   // Mock data for activity log
-  const activityLog: ActivityLog[] = [
-    {
-      id: '1',
-      action: 'Profile Updated',
-      performedBy: 'John Smith',
-      timestamp: '2024-12-01T10:30:00Z',
-      details: 'Updated contact information and role'
-    },
-    {
-      id: '2',
-      action: 'Note Added',
-      performedBy: 'Sarah Johnson',
-      timestamp: '2024-11-28T14:15:00Z',
-      details: 'Added note about trade preferences'
-    },
-    {
-      id: '3',
-      action: 'Event Registration',
-      performedBy: 'System',
-      timestamp: '2024-11-25T09:00:00Z',
-      details: 'Registered for Expo 2025 Osaka'
-    },
-    {
-      id: '4',
-      action: 'Membership Extended',
-      performedBy: 'Admin User',
-      timestamp: '2024-11-20T16:45:00Z',
-      details: 'Extended membership until 2025'
-    },
-    {
-      id: '5',
-      action: 'Profile Created',
-      performedBy: 'System',
-      timestamp: '2022-01-15T08:00:00Z',
-      details: 'Initial profile creation'
-    }
-  ]
 
-  // Mock data for multiple membership periods
-  const membershipPeriods: MembershipPeriod[] = [
-    {
-      id: '1',
-      startDate: '2024-01-01',
-      role: 'Senior Delegate',
-      isActive: true,
-      memberState: delegate.memberState || 'Unknown',
-      notes: 'Current active membership'
-    },
-    {
-      id: '2',
-      startDate: '2022-01-15',
-      endDate: '2023-12-31',
-      role: 'Delegate',
-      isActive: false,
-      memberState: delegate.memberState || 'Unknown',
-      notes: 'Previous term as regular delegate'
-    },
-    {
-      id: '3',
-      startDate: '2020-06-01',
-      endDate: '2021-12-31',
-      role: 'Observer',
-      isActive: false,
-      memberState: delegate.memberState || 'Unknown',
-      notes: 'Initial observer status'
-    }
-  ]
 
-  // Mock addresses
-  const addresses = [
-    {
-      type: 'Work',
-      street: '123 Diplomatic Avenue',
-      city: 'Geneva',
-      state: 'Geneva',
-      country: 'Switzerland',
-      postalCode: '1202'
-    },
-    {
-      type: 'Home',
-      street: '456 Embassy Row',
-      city: delegate.memberState?.split(' ')[0] || 'Capital',
-      state: delegate.memberState || 'State',
-      country: delegate.memberState || 'Country',
-      postalCode: '12345'
-    }
-  ]
+
+
+const events: Event[] = [
+  {
+    id: '1',
+    name: 'GA 2024',
+    type: 'GA',
+    year: 2024,
+    city: 'Geneva',
+    country: 'Switzerland',
+    startDate: '2024-09-15',
+    endDate: '2024-09-18',
+    role: 'Delegate',
+    status: 'attended'
+  },
+  // ...
+]
 
   const getLanguageIcon = (language: 'English' | 'French') => {
     if (language === 'French') {
@@ -273,16 +181,6 @@ export function DelegateProfile({ delegate, isOpen, onClose }: DelegateProfilePr
     )
   }
 
-  const getEventStatusBadge = (status: Event['status']) => {
-    switch (status) {
-      case 'attended':
-        return <Badge variant="default" className="text-xs">Attended</Badge>
-      case 'registered':
-        return <Badge variant="secondary" className="text-xs">Registered</Badge>
-      case 'cancelled':
-        return <Badge variant="destructive" className="text-xs">Cancelled</Badge>
-    }
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -316,8 +214,8 @@ export function DelegateProfile({ delegate, isOpen, onClose }: DelegateProfilePr
                     <Badge variant={delegate.membershipType === 'delegate' ? 'default' : 'secondary'}>
                       {delegate.membershipType === 'delegate' ? 'Delegate' : 'Member State'}
                     </Badge>
-                    <Badge variant={delegate.isActive ? 'default' : 'destructive'}>
-                      {delegate.isActive ? 'Active' : 'Inactive'}
+                    <Badge variant={delegate.active === 1 ? 'default' : 'destructive'}>
+                      {delegate.active==1 ? 'Active' : 'Inactive'}
                     </Badge>
                     {delegate.isNewsletterSubscribed && (
                       <Badge variant="outline">
@@ -360,18 +258,19 @@ export function DelegateProfile({ delegate, isOpen, onClose }: DelegateProfilePr
                       Addresses
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {addresses.map((address, index) => (
-                      <div key={index} className="border-l-4 border-blue-200 pl-4">
-                        <div className="font-medium text-sm text-gray-700">{address.type}</div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          <div>{address.street}</div>
-                          <div>{address.city}, {address.state} {address.postalCode}</div>
-                          <div>{address.country}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
+            <CardContent className="space-y-4">
+  {(Array.isArray(delegate.address) ? delegate.address : [delegate.address]).map((address, index) => (
+    <div key={index} className="border-l-4 border-blue-200 pl-4">
+      <div className="font-medium text-sm text-gray-700">adress type</div>
+      <div className="text-sm text-gray-600 mt-1">
+        <div>street nale </div>
+        <div>city</div>
+        <div>{delegate.country}</div>
+      </div>
+    </div>
+  ))}
+</CardContent>
+
                 </Card>
 
                 {/* Contact Information */}
@@ -414,7 +313,7 @@ export function DelegateProfile({ delegate, isOpen, onClose }: DelegateProfilePr
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {membershipPeriods.map((period) => (
+                    {memberships.map((period) => (
                       <div key={period.id} className={`border-l-4 pl-4 ${period.isActive ? 'border-green-400 bg-green-50' : 'border-gray-300'}`}>
                         <div className="flex items-center justify-between">
                           <div>
@@ -463,7 +362,7 @@ export function DelegateProfile({ delegate, isOpen, onClose }: DelegateProfilePr
                             )}
                           </div>
                           <div className="text-right">
-                            {getEventStatusBadge(event.status)}
+                            {(event.status)}
                             <div className="text-xs text-gray-500 mt-1">{event.year}</div>
                           </div>
                         </div>
@@ -518,7 +417,7 @@ export function DelegateProfile({ delegate, isOpen, onClose }: DelegateProfilePr
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {activityLog.map((log) => (
+                    {ActivityLog.map((log) => (
                       <div key={log.id} className="border-l-4 border-gray-200 pl-4 py-2">
                         <div className="flex items-center justify-between">
                           <div>

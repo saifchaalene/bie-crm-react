@@ -22,8 +22,8 @@ function buildParams(task: string, extra: Record<string, string | number>) {
 }
 
 export const DelegatesService = {
-  async getDelegateById(id: number): Promise<Delegate> {
-    const params = buildParams('Delegate.getDelegate', { id })
+  async getDelegateById(id: number): Promise<any> {
+    const params = buildParams('contact.getContact', { id })
 
     const { data } = await axios.get<JoomlaJsonResponse<Delegate>>(BASE_URL, {
       params,
@@ -38,8 +38,8 @@ export const DelegatesService = {
   },
 
   async getNotesByDelegateId(delegateId: number): Promise<DelegateNote[]> {
-    const params = buildParams('Delegate.getNotesByDelegateId', {
-      Delegate_id: delegateId,
+    const params = buildParams('contact.getNotesByContactId', {
+      contact_id: delegateId,
     })
 
     const { data } = await axios.get<JoomlaJsonResponse<{ notes: DelegateNote[] }>>(BASE_URL, {
@@ -55,8 +55,8 @@ export const DelegatesService = {
   },
 
   async getMembershipsByDelegateId(delegateId: number): Promise<any[]> {
-    const params = buildParams('Delegate.getMembershipByDelegateId', {
-      Delegate_id: delegateId,
+    const params = buildParams('contact.getMembershipByContactId', {
+      contact_id: delegateId,
     })
 
     const { data } = await axios.get<JoomlaJsonResponse<{ memberships: any[] }>>(BASE_URL, {
@@ -72,8 +72,8 @@ export const DelegatesService = {
   },
 
   async getActivitiesByDelegateId(delegateId: number): Promise<Activitysaif[]> {
-    const params = buildParams('Delegate.getActivitysByDelegateId', {
-      Delegate_id: delegateId,
+    const params = buildParams('contact.getActivitysByContactId', {
+      contact_id: delegateId,
     })
 
     const { data } = await axios.get<JoomlaJsonResponse<{ activities: Activitysaif[] }>>(BASE_URL, {
@@ -89,7 +89,7 @@ export const DelegatesService = {
   },
 
   async generateIdentityCardUrl(delegateId: number): Promise<string> {
-    const params = buildParams('Delegate.getIdentityCardUrl', {
+    const params = buildParams('contact.getIdentityCardUrl', {
       cid: delegateId,
     })
 

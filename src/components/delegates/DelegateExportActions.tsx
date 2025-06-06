@@ -28,7 +28,7 @@ export function DelegateExportActions({
   }
 
   const handleExportSelected = () => {
-    const selectedDelegateData = filteredDelegates.filter(d => selectedDelegates.has(d.id))
+    const selectedDelegateData = filteredDelegates.filter(d => selectedDelegates.has(d.id.toString()))
     if (selectedDelegateData.length === 0) {
       toast({
         title: "No Selection",

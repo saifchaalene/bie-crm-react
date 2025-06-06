@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Delegate } from '@/types/delegate'
 import { DelegatesService } from '@/services/delegatesService'
 
 export function useDelegates() {
-  const [delegates, setDelegates] = useState<Delegate[]>([])
+  const [delegates, setDelegates] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -20,23 +19,23 @@ useEffect(() => {
     setLoading(true)
     try {
       const data = await DelegatesService.getAllDelegates()
-      console.log('Data received:', data)
-      setDelegates(data)
+
+      const uniqueDelegates = Object.values(
+        data.reduce((acc: any, curr: any) => {
+          acc[curr.id] = curr 
+          return acc
+        }, {})
+      )
+
+      setDelegates(uniqueDelegates)
     } catch (err: any) {
-      console.error(' [useDelegates] Error fetching delegates:', err)
       setError(err.message || 'Failed to load delegates')
     } finally {
       setLoading(false)
-      console.log('[useDelegates] Loading finished')
     }
   }
   fetchData()
-
-
 }, [])
-
-
-
 
   const memberStates = useMemo(() => {
     return Array.from(new Set(delegates.map(d => d.country || '')))
@@ -44,31 +43,46 @@ useEffect(() => {
       .sort()
   }, [delegates])
 
-const filteredDelegates = useMemo(() => {
-  return delegates
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "newest":
-          return new Date(b.startDate || '').getTime() - new Date(a.startDate || '').getTime()
-        case "oldest":
-          return new Date(a.startDate || '').getTime() - new Date(b.startDate || '').getTime()
-        case "name_asc":
-          return (a.fullname || '').localeCompare(b.fullname || '')
-        case "name_desc":
-          return (b.fullname || '').localeCompare(a.fullname || '')
-        default:
-          return 0
-      }
-    })
-}, [delegates, sortBy])
+  const filteredDelegates = useMemo(() => {
+    return delegates
+      .filter(delegate => {
+        const matchesSearch = delegate.fullname?.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesTab =
+          activeTab === 'all' ||
+          (activeTab === 'active' && delegate.type === 1) ||
+          (activeTab === 'inactive' && delegate.type === 2)
+        const matchesMemberState =
+          selectedMemberState === 'all_states' || delegate.country === selectedMemberState
+        const matchesNewsletter =
+          selectedNewsletterStatus === 'all_newsletter' ||
+          (selectedNewsletterStatus === 'subscribed' && delegate.isSubscribed === 1) ||
+          (selectedNewsletterStatus === 'not_subscribed' && delegate.isSubscribed != 1)
+
+        return matchesSearch && matchesTab && matchesMemberState && matchesNewsletter
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'newest':
+            return new Date(b.start_date || '').getTime() - new Date(a.start_date || '').getTime()
+          case 'oldest':
+            return new Date(a.start_date || '').getTime() - new Date(b.start_date || '').getTime()
+          case 'name_asc':
+            return (a.fullname || '').localeCompare(b.fullname || '')
+          case 'name_desc':
+            return (b.fullname || '').localeCompare(a.fullname || '')
+          default:
+            return 0
+        }
+      })
+  }, [delegates, searchTerm, activeTab, selectedMemberState, selectedNewsletterStatus, sortBy])
 
   const totalPages = Math.ceil(filteredDelegates.length / pageSize)
   const startIndex = (currentPage - 1) * pageSize
   const currentDelegates = filteredDelegates.slice(startIndex, startIndex + pageSize)
 
   const stats = useMemo(() => {
-    const activeDelegates = delegates.filter(d => d.isActive)
-    const newsletterSubscribers = delegates.filter(d => d.isNewsletterSubscribed)
+    const activeDelegates = delegates.filter(d => d.type === 1)
+    const newsletterSubscribers = delegates.filter(d => d.isSubscribed === 1)
 
     return {
       activeDelegates: activeDelegates.length,
@@ -86,13 +100,6 @@ const filteredDelegates = useMemo(() => {
     setPageSize(parseInt(size))
     setCurrentPage(1)
   }
-  useEffect(() => {
-    if (delegates.length > 0) {
-      console.log('filteredDelegates:', filteredDelegates)
-      console.log(' currentDelegates:', currentDelegates)
-    }
-  }, [delegates, filteredDelegates, currentDelegates])
-
 
   return {
     delegates,

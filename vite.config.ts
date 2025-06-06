@@ -5,9 +5,9 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "test82mac.bie-paris.local", // Your custom host
+    host: "test82mac.bie-paris.local", 
     port: 8080,
-    strictPort: true, // Ensures Vite fails if port 8080 is taken
+    strictPort: true, 
   },
   plugins: [
     react(),
