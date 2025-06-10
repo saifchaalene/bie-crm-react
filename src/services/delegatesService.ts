@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Delegate, DelegateNote, Activitysaif } from '@/types/delegate'
 
-const BASE_URL = 'http://test82mac.bie-paris.local/index.php'
+const BASE_URL = 'https://test82mac.bie-paris.local/index.php'
 const DEFAULT_PARAMS = {
   option: 'com_bie_membersf',
   format: 'json',

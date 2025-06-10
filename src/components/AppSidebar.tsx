@@ -1,4 +1,4 @@
-import { Calendar, Users, Home, Building, UserCheck, ChevronDown } from "lucide-react"
+import { Users, Home, Building, UserCheck, ChevronDown } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useState } from "react"
 import {
@@ -22,13 +22,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 
-const mainItems = [
-  { title: "Dashboard", url: "/", icon: Home },
-  { title: "Contacts", url: "/contacts", icon: Users },
-  { title: "Events", url: "/events", icon: Calendar },
-]
-
 const membershipItems = [
+  { title: "Dashboard", url: "/", icon: Home },
   { title: "Delegates", url: "/delegates", icon: UserCheck },
   { title: "Member States", url: "/member-states", icon: Building },
 ]
@@ -40,10 +35,7 @@ export function AppSidebar() {
   
   // Check if any membership route is active to keep the group open
   const isMembershipActive = membershipItems.some(item => currentPath === item.url)
-  const [membershipOpen, setMembershipOpen] = useState(isMembershipActive)
-
-  const isActive = (path: string) => currentPath === path
-  const isExpanded = mainItems.some((item) => isActive(item.url))
+  const [membershipOpen, setMembershipOpen] = useState(true) // Always open by default
 
   return (
     <Sidebar className={state === "collapsed" ? "w-14" : "w-60"} collapsible="icon">
@@ -62,30 +54,9 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Membership Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 p-2 rounded-md transition-colors ${
-                          isActive
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                        }`
-                      }
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {state !== "collapsed" && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              
               {/* Membership section with sub-items */}
               <Collapsible open={membershipOpen} onOpenChange={setMembershipOpen}>
                 <SidebarMenuItem>
@@ -107,6 +78,7 @@ export function AppSidebar() {
                           <SidebarMenuSubButton asChild>
                             <NavLink
                               to={item.url}
+                              end
                               className={({ isActive }) =>
                                 `flex items-center gap-3 p-2 rounded-md transition-colors ${
                                   isActive

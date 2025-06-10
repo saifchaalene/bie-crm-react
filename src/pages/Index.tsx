@@ -1,13 +1,9 @@
 
-import { Layout } from "@/components/Layout"
-import Dashboard from "./Dashboard"
+import { Navigate } from "react-router-dom"
 
 const Index = () => {
-  return (
-    <Layout>
-      <Dashboard />
-    </Layout>
-  )
+  // Redirect to membership dashboard
+  return <Navigate to="/" replace />
 }
 
 export default Index
